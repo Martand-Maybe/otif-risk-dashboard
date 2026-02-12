@@ -156,7 +156,47 @@ body {
 .sidebar-footer {
   padding: 1rem;
   border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
+
+.sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sidebar-toggle:hover {
+  background-color: var(--background);
+  color: var(--text-main);
+}
+
+/* Collapsed Sidebar State */
+.sidebar.collapsed {
+  width: 80px;
+}
+
+.sidebar.collapsed .logo-text {
+  display: none;
+}
+
+.sidebar.collapsed .nav-item {
+  justify-content: center;
+  padding: 0.75rem;
+}
+
+.sidebar.collapsed .sidebar-footer {
+  align-items: center;
+}
+
 
 /* --- Cards --- */
 .grid-container {

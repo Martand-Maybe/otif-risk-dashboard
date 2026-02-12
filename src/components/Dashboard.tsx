@@ -10,6 +10,7 @@ import type { OTIFData } from '../utils/csvParser';
 export const Dashboard: React.FC = () => {
   const [orders, setOrders] = useState<OTIFData[]>([]);
   const [lastUpdated, setLastUpdated] = useState<string>(new Date().toLocaleString());
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const handleDataLoaded = (data: OTIFData[]) => {
     setOrders(data);
@@ -27,7 +28,7 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="app-container">
-      <Sidebar />
+      <Sidebar isCollapsed={isSidebarCollapsed} onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)} />
       
       <main className="main-content">
         <div className="dashboard-content">
