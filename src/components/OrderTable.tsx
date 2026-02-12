@@ -144,6 +144,219 @@ const FilterDropdown = memo(({
   );
 });
 
+// Date Range Filter Component
+interface DateRangeFilterProps {
+  title: string;
+  isOpen: boolean;
+  dateRange: { min: string; max: string };
+  onOpen: () => void;
+  onClose: () => void;
+  onChange: (range: { min: string; max: string }) => void;
+  onClear: () => void;
+  onSort: (field: SortField) => void;
+  sortIcon: React.ReactNode;
+}
+
+const DateRangeFilter = memo(({ 
+  title, 
+  isOpen, 
+  dateRange, 
+  onOpen, 
+  onClose, 
+  onChange, 
+  onClear,
+  onSort,
+  sortIcon
+}: DateRangeFilterProps) => {
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const isActive = dateRange.min !== '' || dateRange.max !== '';
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen, onClose]);
+
+  return (
+    <div className="th-wrapper">
+      <div className="th-content">
+        <span 
+          className="sortable" 
+          onClick={() => onSort('ReqDeliveryDate')}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}
+        >
+          {title} {sortIcon}
+        </span>
+        <button 
+          className={`filter-btn ${isActive || isOpen ? 'active' : ''}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (isOpen) onClose();
+            else onOpen();
+          }}
+        >
+          <Filter size={14} strokeWidth={isActive ? 3 : 2} />
+        </button>
+      </div>
+
+      {isOpen && (
+        <div className="filter-dropdown" ref={dropdownRef} onClick={e => e.stopPropagation()}>
+          <div className="filter-header" style={{ borderBottom: 'none', paddingBottom: 0 }}>
+            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.25rem' }}>From</label>
+            <input 
+              type="date" 
+              className="filter-search"
+              value={dateRange.min}
+              onChange={e => onChange({ ...dateRange, min: e.target.value })}
+              style={{ marginBottom: '0.75rem' }}
+            />
+            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.25rem' }}>To</label>
+            <input 
+              type="date" 
+              className="filter-search"
+              value={dateRange.max}
+              onChange={e => onChange({ ...dateRange, max: e.target.value })}
+            />
+          </div>
+          <div className="filter-actions">
+            <button 
+              className="btn btn-outline btn-xs"
+              onClick={onClear}
+              disabled={!isActive}
+            >
+              Clear
+            </button>
+            <button 
+              className="btn btn-primary btn-xs"
+              onClick={onClose}
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+});
+
+// Numeric Range Filter Component
+interface NumericRangeFilterProps {
+  title: string;
+  field: SortField;
+  isOpen: boolean;
+  range: { min: number; max: number };
+  absoluteRange: { min: number; max: number };
+  onOpen: () => void;
+  onClose: () => void;
+  onChange: (range: { min: number; max: number }) => void;
+  onClear: () => void;
+  onSort: (field: SortField) => void;
+  sortIcon: React.ReactNode;
+  suffix?: string;
+}
+
+const NumericRangeFilter = memo(({ 
+  title, 
+  field,
+  isOpen, 
+  range, 
+  absoluteRange,
+  onOpen, 
+  onClose, 
+  onChange, 
+  onClear,
+  onSort,
+  sortIcon,
+  suffix = ''
+}: NumericRangeFilterProps) => {
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const isActive = range.min !== absoluteRange.min || range.max !== absoluteRange.max;
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen, onClose]);
+
+  return (
+    <div className="th-wrapper">
+      <div className="th-content">
+        <span 
+          className="sortable" 
+          onClick={() => onSort(field)}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}
+        >
+          {title} {sortIcon}
+        </span>
+        <button 
+          className={`filter-btn ${isActive || isOpen ? 'active' : ''}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (isOpen) onClose();
+            else onOpen();
+          }}
+        >
+          <Filter size={14} strokeWidth={isActive ? 3 : 2} />
+        </button>
+      </div>
+
+      {isOpen && (
+        <div className="filter-dropdown" ref={dropdownRef} onClick={e => e.stopPropagation()}>
+          <div className="filter-header" style={{ borderBottom: 'none', paddingBottom: 0 }}>
+            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.25rem' }}>
+              Min: {range.min}{suffix}
+            </label>
+            <input 
+              type="range" 
+              min={absoluteRange.min}
+              max={absoluteRange.max}
+              value={range.min}
+              onChange={e => onChange({ ...range, min: Number(e.target.value) })}
+              style={{ width: '100%', marginBottom: '1rem' }}
+            />
+            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.25rem' }}>
+              Max: {range.max}{suffix}
+            </label>
+            <input 
+              type="range" 
+              min={absoluteRange.min}
+              max={absoluteRange.max}
+              value={range.max}
+              onChange={e => onChange({ ...range, max: Number(e.target.value) })}
+              style={{ width: '100%' }}
+            />
+          </div>
+          <div className="filter-actions">
+            <button 
+              className="btn btn-outline btn-xs"
+              onClick={onClear}
+              disabled={!isActive}
+            >
+              Clear
+            </button>
+            <button 
+              className="btn btn-primary btn-xs"
+              onClick={onClose}
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+});
+
 // --- Main Component ---
 
 export const OrderTable: React.FC<OrderTableProps> = ({ data }) => {
@@ -156,6 +369,11 @@ export const OrderTable: React.FC<OrderTableProps> = ({ data }) => {
   // Filter State
   const [activeFilterColumn, setActiveFilterColumn] = useState<string | null>(null);
   const [filters, setFilters] = useState<Record<string, Set<string>>>({});
+  
+  // Range Filter State
+  const [dateRange, setDateRange] = useState<{ min: string; max: string }>({ min: '', max: '' });
+  const [leadTimeRange, setLeadTimeRange] = useState<{ min: number; max: number }>({ min: 0, max: 0 });
+  const [riskScoreRange, setRiskScoreRange] = useState<{ min: number; max: number }>({ min: 0, max: 100 });
 
   // Pre-calculate unique values for filterable columns only when data changes
   const uniqueValuesMap = useMemo(() => {
@@ -169,6 +387,27 @@ export const OrderTable: React.FC<OrderTableProps> = ({ data }) => {
       });
       return map;
   }, [data]);
+
+  // Calculate min/max for range filters
+  const rangeValues = useMemo(() => {
+    if (data.length === 0) return { leadTime: { min: 0, max: 100 }, riskScore: { min: 0, max: 100 } };
+    
+    const leadTimes = data.map(d => d.LeadTime);
+    const riskScores = data.map(d => d.RiskScore);
+    
+    return {
+      leadTime: { min: Math.min(...leadTimes), max: Math.max(...leadTimes) },
+      riskScore: { min: Math.min(...riskScores), max: Math.max(...riskScores) }
+    };
+  }, [data]);
+
+  // Initialize range filters when data changes
+  useEffect(() => {
+    if (data.length > 0) {
+      setLeadTimeRange({ min: rangeValues.leadTime.min, max: rangeValues.leadTime.max });
+      setRiskScoreRange({ min: rangeValues.riskScore.min, max: rangeValues.riskScore.max });
+    }
+  }, [data, rangeValues]);
 
   const handleSort = (field: SortField) => {
     if (field === sortField) {
@@ -199,6 +438,18 @@ export const OrderTable: React.FC<OrderTableProps> = ({ data }) => {
     setFilters(newFilters);
   };
 
+  const clearDateRange = () => {
+    setDateRange({ min: '', max: '' });
+  };
+
+  const clearLeadTimeRange = () => {
+    setLeadTimeRange({ min: rangeValues.leadTime.min, max: rangeValues.leadTime.max });
+  };
+
+  const clearRiskScoreRange = () => {
+    setRiskScoreRange({ min: rangeValues.riskScore.min, max: rangeValues.riskScore.max });
+  };
+
   const filteredData = useMemo(() => {
     return data.filter((item) => {
       // Global Search
@@ -217,9 +468,26 @@ export const OrderTable: React.FC<OrderTableProps> = ({ data }) => {
         }
       }
 
+      // Date Range Filter
+      if (dateRange.min || dateRange.max) {
+        const itemDate = item.ReqDeliveryDate;
+        if (dateRange.min && itemDate < dateRange.min) return false;
+        if (dateRange.max && itemDate > dateRange.max) return false;
+      }
+
+      // Lead Time Range Filter
+      if (leadTimeRange.min !== rangeValues.leadTime.min || leadTimeRange.max !== rangeValues.leadTime.max) {
+        if (item.LeadTime < leadTimeRange.min || item.LeadTime > leadTimeRange.max) return false;
+      }
+
+      // Risk Score Range Filter
+      if (riskScoreRange.min !== rangeValues.riskScore.min || riskScoreRange.max !== rangeValues.riskScore.max) {
+        if (item.RiskScore < riskScoreRange.min || item.RiskScore > riskScoreRange.max) return false;
+      }
+
       return true;
     });
-  }, [data, searchTerm, filters]);
+  }, [data, searchTerm, filters, dateRange, leadTimeRange, riskScoreRange, rangeValues]);
 
   const sortedData = useMemo(() => {
     return [...filteredData].sort((a, b) => {
@@ -294,10 +562,17 @@ export const OrderTable: React.FC<OrderTableProps> = ({ data }) => {
             <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
             Showing {currentData.length} of {sortedData.length} orders
             </p>
-            {Object.keys(filters).length > 0 && (
+            {(Object.keys(filters).length > 0 || dateRange.min || dateRange.max || 
+              leadTimeRange.min !== rangeValues.leadTime.min || leadTimeRange.max !== rangeValues.leadTime.max ||
+              riskScoreRange.min !== rangeValues.riskScore.min || riskScoreRange.max !== rangeValues.riskScore.max) && (
                 <button 
                     className="btn btn-outline btn-xs" 
-                    onClick={() => setFilters({})}
+                    onClick={() => {
+                      setFilters({});
+                      clearDateRange();
+                      clearLeadTimeRange();
+                      clearRiskScoreRange();
+                    }}
                     style={{ color: 'var(--danger)', borderColor: 'var(--danger-bg)' }}
                 >
                     <X size={12} /> Clear all filters
@@ -356,19 +631,49 @@ export const OrderTable: React.FC<OrderTableProps> = ({ data }) => {
                 />
               </th>
               <th style={{ minWidth: '160px' }}>
-                <div className="sortable" onClick={() => handleSort('ReqDeliveryDate')} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    Req. Delivery <SortIcon field="ReqDeliveryDate" currentSortField={sortField} currentSortDirection={sortDirection} />
-                </div>
+                <DateRangeFilter 
+                    title="Req. Delivery"
+                    isOpen={activeFilterColumn === "ReqDeliveryDate"}
+                    dateRange={dateRange}
+                    onOpen={() => setActiveFilterColumn("ReqDeliveryDate")}
+                    onClose={() => setActiveFilterColumn(null)}
+                    onChange={setDateRange}
+                    onClear={clearDateRange}
+                    onSort={handleSort}
+                    sortIcon={<SortIcon field="ReqDeliveryDate" currentSortField={sortField} currentSortDirection={sortDirection} />}
+                />
               </th>
               <th style={{ minWidth: '140px' }}>
-                <div className="sortable" onClick={() => handleSort('LeadTime')} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    Lead Time <SortIcon field="LeadTime" currentSortField={sortField} currentSortDirection={sortDirection} />
-                </div>
+                <NumericRangeFilter 
+                    title="Lead Time"
+                    field="LeadTime"
+                    isOpen={activeFilterColumn === "LeadTime"}
+                    range={leadTimeRange}
+                    absoluteRange={rangeValues.leadTime}
+                    onOpen={() => setActiveFilterColumn("LeadTime")}
+                    onClose={() => setActiveFilterColumn(null)}
+                    onChange={setLeadTimeRange}
+                    onClear={clearLeadTimeRange}
+                    onSort={handleSort}
+                    sortIcon={<SortIcon field="LeadTime" currentSortField={sortField} currentSortDirection={sortDirection} />}
+                    suffix=" days"
+                />
               </th>
               <th style={{ minWidth: '140px' }}>
-                <div className="sortable" onClick={() => handleSort('RiskScore')} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    Risk Score <SortIcon field="RiskScore" currentSortField={sortField} currentSortDirection={sortDirection} />
-                </div>
+                <NumericRangeFilter 
+                    title="Risk Score"
+                    field="RiskScore"
+                    isOpen={activeFilterColumn === "RiskScore"}
+                    range={riskScoreRange}
+                    absoluteRange={rangeValues.riskScore}
+                    onOpen={() => setActiveFilterColumn("RiskScore")}
+                    onClose={() => setActiveFilterColumn(null)}
+                    onChange={setRiskScoreRange}
+                    onClear={clearRiskScoreRange}
+                    onSort={handleSort}
+                    sortIcon={<SortIcon field="RiskScore" currentSortField={sortField} currentSortDirection={sortDirection} />}
+                    suffix="%"
+                />
               </th>
               <th style={{ minWidth: '140px' }}>
                  <FilterDropdown 
