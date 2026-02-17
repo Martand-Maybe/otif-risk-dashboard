@@ -3,6 +3,7 @@ import Papa from 'papaparse';
 export interface OTIFData {
   SalesOrder: string;
   Customer: string;
+  MaterialDescription: string;
   Plant: string;
   ReqDeliveryDate: string;
   LeadTime: number; // Calculated
@@ -36,6 +37,7 @@ export const parseCSV = (file: File): Promise<OTIFData[]> => {
           if (row['OTIF_HIT/MISS'] === 'Miss') signals.push('Historical Miss pattern');
 
           return {
+            MaterialDescription: row['Material description'] || 'N/A',
             SalesOrder: row['Sales order'] || 'N/A',
             Customer: row['Customer Name'] || 'Unknown',
             Plant: row['Plant'] || 'Unknown',

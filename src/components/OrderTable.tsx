@@ -6,7 +6,7 @@ interface OrderTableProps {
   data: OTIFData[];
 }
 
-type SortField = 'SalesOrder' | 'ReqDeliveryDate' | 'LeadTime' | 'RiskScore' | 'Customer';
+type SortField = 'SalesOrder' | 'ReqDeliveryDate' | 'LeadTime' | 'RiskScore' | 'Customer' | 'MaterialDescription';
 type SortDirection = 'asc' | 'desc';
 
 // --- Helper Components ---
@@ -377,7 +377,7 @@ export const OrderTable: React.FC<OrderTableProps> = ({ data }) => {
 
   // Pre-calculate unique values for filterable columns only when data changes
   const uniqueValuesMap = useMemo(() => {
-      const columns = ['SalesOrder', 'Customer', 'Plant', 'OTIFStatus'];
+      const columns = ['SalesOrder', 'Customer', 'MaterialDescription', 'Plant', 'OTIFStatus'];
       const map: Record<string, string[]> = {};
       columns.forEach(col => {
           // Optimization: Use a Set to get unique values, then sort
@@ -456,6 +456,7 @@ export const OrderTable: React.FC<OrderTableProps> = ({ data }) => {
       const matchesSearch = 
         item.SalesOrder.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.Customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.MaterialDescription.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.Plant.toLowerCase().includes(searchTerm.toLowerCase());
 
       if (!matchesSearch) return false;
@@ -507,12 +508,13 @@ export const OrderTable: React.FC<OrderTableProps> = ({ data }) => {
   );
 
   const exportCSV = () => {
-    const headers = ['Sales Order', 'Customer', 'Plant', 'Req. Delivery', 'Lead Time', 'Risk Score', 'OTIF Status', 'Top Risk Signals'];
+    const headers = ['Sales Order', 'Customer', 'Material Description', 'Plant', 'Req. Delivery', 'Lead Time', 'Risk Score', 'OTIF Status', 'Top Risk Signals'];
     const csvContent = [
         headers.join(','),
         ...sortedData.map(row => [
             row.SalesOrder,
             `"${row.Customer}"`,
+            `"${row.MaterialDescription}"`,
             row.Plant,
             row.ReqDeliveryDate,
             row.LeadTime,
@@ -542,7 +544,7 @@ export const OrderTable: React.FC<OrderTableProps> = ({ data }) => {
             <Search className="search-icon" />
             <input
               type="text"
-              placeholder="Search by order, customer, or plant..."
+              placeholder="Search..."
               className="search-input"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -615,6 +617,21 @@ export const OrderTable: React.FC<OrderTableProps> = ({ data }) => {
                     sortIcon={<SortIcon field="Customer" currentSortField={sortField} currentSortDirection={sortDirection} />}
                 />
               </th>
+              <th style={{ minWidth: '200px' }}>
+                <FilterDropdown 
+                    column="MaterialDescription" 
+                    title="Material Description"
+                    isOpen={activeFilterColumn === "MaterialDescription"}
+                    uniqueValues={uniqueValuesMap["MaterialDescription"] || []}
+                    selectedValues={filters["MaterialDescription"] || new Set()}
+                    onOpen={setActiveFilterColumn}
+                    onClose={() => setActiveFilterColumn(null)}
+                    onToggle={toggleFilter}
+                    onClear={clearColumnFilter}
+                    onSort={handleSort}
+                    sortIcon={<SortIcon field="MaterialDescription" currentSortField={sortField} currentSortDirection={sortDirection} />}
+                />
+              </th>
               <th style={{ minWidth: '120px' }}>
                  <FilterDropdown 
                     column="Plant" 
@@ -627,7 +644,7 @@ export const OrderTable: React.FC<OrderTableProps> = ({ data }) => {
                     onToggle={toggleFilter}
                     onClear={clearColumnFilter}
                     onSort={handleSort}
-                    sortIcon={null} // Plant typically not sorted in this view logic, but can be
+                    sortIcon={null}
                 />
               </th>
               <th style={{ minWidth: '160px' }}>
@@ -698,6 +715,7 @@ export const OrderTable: React.FC<OrderTableProps> = ({ data }) => {
               <tr key={`${row.SalesOrder}-${idx}`}>
                 <td style={{ fontWeight: 500, color: 'var(--primary)' }}>{row.SalesOrder}</td>
                 <td>{row.Customer}</td>
+                <td style={{ color: 'var(--text-secondary)' }}>{row.MaterialDescription}</td>
                 <td style={{ color: 'var(--text-secondary)' }}>{row.Plant}</td>
                 <td style={{ color: 'var(--text-secondary)' }}>{row.ReqDeliveryDate}</td>
                 <td style={{ color: 'var(--text-secondary)' }}>{row.LeadTime} days</td>
@@ -707,7 +725,10 @@ export const OrderTable: React.FC<OrderTableProps> = ({ data }) => {
                     {row.OTIFStatus === 'Miss' ? 'OTIF Miss' : 'OTIF Hit'}
                   </span>
                 </td>
-                <td style={{ color: 'var(--text-secondary)', maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <td 
+                  style={{ color: 'var(--text-secondary)', maxWidth: '300px' }} 
+                  title={row.TopRiskSignals.join('; ')}
+                >
                   {row.TopRiskSignals.join('; ')}
                 </td>
               </tr>
