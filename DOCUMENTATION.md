@@ -38,6 +38,22 @@ The application transforms raw CSV data into an interactive intelligence dashboa
 
 ## 3. Calculations & Logic
 
+### System Data Flow
+
+```mermaid
+graph TD
+    A[User Uploads CSV] -->|PapaParse| B(Raw Data Parsing)
+    B --> C{Data Processing}
+    C -->|Calculate| D[Lead Time]
+    C -->|Calculate| E[Risk Score]
+    C -->|Generate| F[Risk Signals]
+    D & E & F --> G[Enriched Order Data]
+    G --> H[Dashboard State]
+    H --> I[Summary Metrics]
+    H --> J[Distribution Chart]
+    H --> K[Order Table]
+```
+
 The dashboard performs several calculations on the client side immediately after data upload.
 
 ### 1. Lead Time
