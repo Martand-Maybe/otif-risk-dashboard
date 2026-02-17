@@ -1,5 +1,10 @@
 # OTIF Risk Dashboard
 
+> **[📖 Read Detailed User Documentation](DOCUMENTATION.md)** - precise calculations, feature guides, and usage instructions.
+
+## Overview
+The **OTIF Risk Dashboard** is a React-based web application designed to help Supply Chain managers visualize and mitigate delivery risks. It processes CSV data to predict On-Time In-Full (OTIF) performance.
+
 A modern, interactive web application for visualizing On-Time In-Full (OTIF) risk intelligence from CSV data.
 
 ## Features
